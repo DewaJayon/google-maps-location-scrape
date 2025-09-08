@@ -1,0 +1,4 @@
+playwright == 1.55.0
+beautifulsoup4 == 4.13.5
+pandas == 2.3.2
+openpy == 3.1.5
