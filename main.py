@@ -47,29 +47,29 @@ def scrape_maps(url):
         html = page.content()
         soup = BeautifulSoup(html, "html.parser")
 
-        schools = soup.find_all("div", {"class": "Nv2PK"})
+        contents = soup.find_all("div", {"class": "Nv2PK"})
 
-        for school in schools:
-            map_url = school.find("a", {"class": "hfpxzc"})["href"]
+        for content in contents:
+            map_url = content.find("a", {"class": "hfpxzc"})["href"]
 
-            name = school.find("div", {"class": "qBF1Pd"}).text.strip()
+            name = content.find("div", {"class": "qBF1Pd"}).text.strip()
 
-            info_tags = school.find_all("div", {"class": "W4Efsd"})
-            school_type, address = None, None
+            info_tags = content.find_all("div", {"class": "W4Efsd"})
+            content_type, address = None, None
 
             for info in info_tags:
                 text = info.get_text(" ", strip=True)
                 if "·" in text:
                     parts = [t.strip() for t in text.split("·")]
                     if len(parts) == 2:
-                        school_type, address = parts
+                        content_type, address = parts
                     break
 
             data.append({
-                "map_url": map_url,
-                "name": name,
-                "school_type": school_type,
-                "address": address,
+                "Map URL": map_url,
+                "Name": name,
+                "Type": content_type,
+                "Address": address,
             })
 
     return data
@@ -77,20 +77,28 @@ def scrape_maps(url):
 
 if __name__ == "__main__":
     
-    url = "https://www.google.com/maps/search/sekolah+di+penatih/@-8.6202457,115.229454,14z/data=!5m1!1e1?entry=ttu&g_ep=EgoyMDI1MDkwMy4wIKXMDSoASAFQAw%3D%3D"
-    schools = scrape_maps(url)
+    try:
+        url = input("Masukkan URL: ")
+    except:
+        print("Terjadi kesalahan, silahkan coba lagi.")
 
-    df = pd.DataFrame(schools)
-    file_name = "data sekolah di penatih.xlsx"
-    df.to_excel(file_name, index=False, engine="openpyxl")
+    try:
+        file_name = input("Masukkan nama file untuk menyimpan data: ")
+    except:
+        print("Mohon masukkan nama file.")
+    
+    scrape = scrape_maps(url)
 
-    wb = load_workbook(file_name)
-    ws = wb.active
+    df = pd.DataFrame(scrape)
+    df.to_excel(f"{file_name}.xlsx", index=False, engine="openpyxl")
+    
+    # wb = load_workbook(file_name)
+    # ws = wb.active
 
-    last_row = ws.max_row + 2 
-    ws.cell(row=last_row, column=1, value=f"Total sekolah: {len(schools)}")
-    ws.cell(row=last_row+1, column=1, value="Sumber data: Google Maps")
-    ws.cell(row=last_row+2, column=1, value="Disusun oleh: Dewa Jayon")
-    ws.cell(row=last_row+3, column=1, value="Ini hanya data yang terdapat di google maps, metode scraping data, untuk lebih lengkap bisa ditanya di kelurahan penatih.")
+    # last_row = ws.max_row + 2 
+    # ws.cell(row=last_row, column=1, value=f"Total Data: {len(scrape)}")
+    # ws.cell(row=last_row+1, column=1, value="Sumber data: Google Maps")
+    # ws.cell(row=last_row+2, column=1, value="Disusun oleh: Dewa Jayon")
+    # ws.cell(row=last_row+3, column=1, value="Ini hanya data yang terdapat di google maps, metode scraping data, untuk lebih lengkap bisa ditanya di kelurahan penatih.")
 
-    wb.save(file_name)
+    # wb.save(file_name)
